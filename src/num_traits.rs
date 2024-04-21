@@ -2,7 +2,7 @@
 
 use super::FiniteF32;
 
-use core::ops::Add;
+use core::ops::{Add, Sub};
 use num_traits::ops::checked::CheckedAdd;
 
 impl Add for FiniteF32 {
@@ -26,11 +26,21 @@ impl CheckedAdd for FiniteF32 {
     }
 }
 
+impl Sub for FiniteF32 {
+    type Output = Self;
+
+    /// # Panics
+    /// This function will panic if and only if the result overflows.
+    fn sub(self, other: Self) -> Self::Output {
+        Self::new(self.get() - other.get()).expect("Overflowed when subtracting two real numbers.")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::FiniteF32;
 
-    use num_traits::ops::checked::CheckedAdd;
+    use num_traits::{identities::Zero, ops::checked::CheckedAdd};
     use proptest::{
         num::f32::{INFINITE, NEGATIVE, POSITIVE},
         prelude::any,
@@ -120,6 +130,36 @@ mod tests {
         #[test]
         fn test_neg(x in gen_finite()) {
             assert_eq!(-x, FiniteF32(-x.get()));
+        }
+    }
+
+    proptest! {
+        /// Test that subtracting zero to a [`FiniteF32`] doesn't change the original number
+        /// and that subtracting a [`FiniteF32`] to zero results in [`FiniteF32::neg`].
+        #[test]
+        fn test_sub_zero(x in gen_finite()) {
+            assert_eq!(x - FiniteF32::zero(), x);
+            assert_eq!(FiniteF32::zero() - x, -x);
+        }
+    }
+
+    proptest! {
+        /// Test that subtracting a [`FiniteF32`] to itself results in [`FiniteF32::neg`].
+        #[test]
+        fn test_sub_self(x in gen_finite()) {
+            assert_eq!(x - x, FiniteF32::zero());
+        }
+    }
+
+    proptest! {
+        /// Test that the subtraction of two [`FiniteF32`]s panics when it overflows.
+        ///
+        /// In order to guarantee overflow, one of the two [`FiniteF32`] actually stores an
+        /// infinite value.
+        #[test]
+        #[should_panic]
+        fn test_sub_overflow(finite in gen_finite(), infinite in gen_infinite()) {
+            let _ = finite - FiniteF32(infinite);
         }
     }
 }

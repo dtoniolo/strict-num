@@ -2,7 +2,7 @@
 
 use super::FiniteF32;
 
-use core::ops::{Add, Neg, Sub};
+use core::ops::{Add, Mul, Neg, Sub};
 use num_traits::ops::checked::{CheckedAdd, CheckedNeg, CheckedSub};
 
 impl Add for FiniteF32 {
@@ -54,6 +54,17 @@ impl CheckedNeg for FiniteF32 {
     /// never return [`None`].
     fn checked_neg(&self) -> Option<Self> {
         Some(self.neg())
+    }
+}
+
+impl Mul for FiniteF32 {
+    type Output = Self;
+
+    /// # Panics
+    /// This function will panic if and only if the result overflow. See
+    /// [`Self::checked_mul`] for a version without panic.
+    fn mul(self, other: Self) -> Self::Output {
+        Self::new(self.get() * other.get()).expect("Overflowed when multiplying two real numbers.")
     }
 }
 
@@ -232,6 +243,38 @@ mod tests {
         #[test]
         fn test_checked_neg(x in gen_finite()) {
             assert_eq!(x.checked_neg(), Some(-x))
+        }
+    }
+
+    proptest! {
+        /// Test that multiplying a [`FiniteF32`] with zero returns zero.
+        #[test]
+        fn test_mul_zero(x in gen_finite()) {
+            let zero = FiniteF32::new(0.0).unwrap();
+            assert_eq!(x * zero, zero);
+            assert_eq!(zero * x, zero);
+        }
+    }
+
+    proptest! {
+        /// Test that multiplying a [`FiniteF32`] with one returns the original number.
+        #[test]
+        fn test_mul_one(x in gen_finite()) {
+            let one = FiniteF32::new(1.0).unwrap();
+            assert_eq!(x * one, x);
+            assert_eq!(one * x, x);
+        }
+    }
+
+    proptest! {
+        /// Test that if the multiplication of two [`FiniteF32`]s panics when it overflows.
+        ///
+        /// In order to guarantee overflow, one of the two [`FiniteF32`] actually stores an
+        /// infinite value.
+        #[test]
+        #[should_panic]
+        fn test_mul_overflow(finite in gen_finite(), infinite in gen_infinite()) {
+            let _ = finite * FiniteF32(infinite);
         }
     }
 }

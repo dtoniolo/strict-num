@@ -114,4 +114,12 @@ mod tests {
             assert_eq!(result, None);
         }
     }
+
+    proptest! {
+        /// Test that the [`Neg`] trait is correctly implemented for [`FiniteF32`].
+        #[test]
+        fn test_neg(x in gen_finite()) {
+            assert_eq!(-x, FiniteF32(-x.get()));
+        }
+    }
 }

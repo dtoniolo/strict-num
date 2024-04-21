@@ -108,7 +108,7 @@ macro_rules! impl_approx_64 {
 /// An immutable, finite [`f32`].
 ///
 /// Unlike [`f32`], implements [`Eq`], [`Ord`] and [`Hash`].
-#[cfg_attr(feature = "num-traits", derive(num_derive::Zero))]
+#[cfg_attr(feature = "num-traits", derive(num_derive::Zero, derive_more::Neg))]
 #[derive(Copy, Clone, Default, Debug)]
 #[repr(transparent)]
 pub struct FiniteF32(f32);

@@ -30,6 +30,7 @@ impl CheckedAdd for FiniteF32 {
 mod tests {
     use super::FiniteF32;
 
+    use num_traits::ops::checked::CheckedAdd;
     use proptest::{
         num::f32::{INFINITE, NEGATIVE, POSITIVE},
         prelude::any,
@@ -78,6 +79,39 @@ mod tests {
         #[should_panic]
         fn test_add_overflow(finite in gen_finite(), infinite in gen_infinite()) {
             let _ = finite + FiniteF32(infinite);
+        }
+    }
+
+    proptest! {
+        /// Test that the checked addition of zero to a [`FiniteF32`] returns the original
+        /// number wrapped in [`Some`].
+        #[test]
+        fn test_checked_add_zero(x in gen_finite()) {
+            let result = x.checked_add(&FiniteF32::new(0.0).unwrap());
+            assert_eq!(result, Some(x));
+        }
+    }
+
+    proptest! {
+        /// Test that the checked addition of a [`FiniteF32`] and its opposite returns
+        /// [`Some`].
+        #[test]
+        fn test_checked_add_opposite(x in gen_finite()) {
+            let result = x.checked_add(&FiniteF32::new(-x.get()).unwrap());
+            matches!(result, Some(_));
+        }
+    }
+
+    proptest! {
+        /// Test that the checked addition of two [`FiniteF32`]s returns [`None`] when it
+        /// overflows.
+        ///
+        /// In order to guarantee overflow, one of the two [`FiniteF32`] actually stores an
+        /// infinite value.
+        #[test]
+        fn test_checked_add_overflow(finite in gen_finite(), infinite in gen_infinite()) {
+            let result = finite.checked_add(&FiniteF32(infinite));
+            assert_eq!(result, None);
         }
     }
 }

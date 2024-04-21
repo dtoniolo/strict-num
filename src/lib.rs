@@ -18,6 +18,8 @@ Unlike [`f32`] and [`f64`], all these types implement [`Eq`], [`Ord`] and
 # Features
 - `approx-eq` implements the `ApproxEq` and `ApproxEqUlps` traits for floating
   point numbers via the `float-cmp` crate. This feature disables `no_std`.
+- `num-traits` implements the traits defined in the `num_traits` library
+  for the types that are listed above.
 - `serde` adds support for Serde.
 */
 
@@ -26,6 +28,8 @@ Unlike [`f32`] and [`f64`], all these types implement [`Eq`], [`Ord`] and
 #![deny(missing_copy_implementations)]
 #![deny(missing_debug_implementations)]
 
+#[cfg(feature = "num-traits")]
+mod num_traits;
 #[cfg(feature = "serde")]
 mod serde;
 

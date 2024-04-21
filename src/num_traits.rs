@@ -3,6 +3,7 @@
 use super::FiniteF32;
 
 use core::ops::Add;
+use num_traits::ops::checked::CheckedAdd;
 
 impl Add for FiniteF32 {
     type Output = Self;
@@ -12,6 +13,16 @@ impl Add for FiniteF32 {
     /// [`Self::checked_add`] for a version without panic.
     fn add(self, other: Self) -> Self::Output {
         Self::new(self.get() + other.get()).expect("Overflowed when adding two real numbers.")
+    }
+}
+
+impl CheckedAdd for FiniteF32 {
+    /// Performs the addition between `self` and `other` and returns [`Some`] if and
+    /// only if the result is finite.
+    ///
+    /// This function never panics.
+    fn checked_add(&self, other: &Self) -> Option<Self> {
+        Self::new(self.get() + other.get())
     }
 }
 

@@ -2,7 +2,7 @@
 
 use super::FiniteF32;
 
-use core::ops::{Add, Mul, Neg, Sub};
+use core::ops::{Add, Div, Mul, Neg, Sub};
 use num_traits::ops::checked::{CheckedAdd, CheckedMul, CheckedNeg, CheckedSub};
 
 impl Add for FiniteF32 {
@@ -78,10 +78,22 @@ impl CheckedMul for FiniteF32 {
     }
 }
 
+impl Div for FiniteF32 {
+    type Output = Self;
+
+    /// # Panics
+    /// This function will panic if and only if the result overflows or is `NaN`. See
+    /// [`Self::checked_div`] for a version without panic.
+    fn div(self, rhs: Self) -> Self {
+        Self::new(self.get() / rhs.get()).expect("Overflowed when dividing two real numbers.")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::FiniteF32;
 
+    use core::ops::Neg;
     use num_traits::{
         identities::{One, Zero},
         ops::checked::{CheckedAdd, CheckedMul, CheckedNeg, CheckedSub},
@@ -106,6 +118,14 @@ mod tests {
         pub fn gen_finite()
             (x in any::<f32>().prop_filter("Values must be finite", |x| x.is_finite())) -> FiniteF32 {
                 FiniteF32::new(x).unwrap()
+            }
+    }
+
+    prop_compose! {
+        /// Randomly generate a [`FiniteF32`] that is not zero.
+        pub fn gen_finite_nonzero()
+            (x in gen_finite().prop_filter("Values must be non-zero", |x| x.get() != 0.0)) -> FiniteF32 {
+                x
             }
     }
 
@@ -356,5 +376,51 @@ mod tests {
     fn test_is_one_for_one() {
         let one = FiniteF32(1.0);
         assert_eq!(one.is_one(), true);
+    }
+
+    proptest! {
+        /// Check that dividing a [`FiniteF32`] by 1 returns the original number.
+        #[test]
+        fn test_div_one(x in gen_finite()) {
+            assert_eq!(x / FiniteF32::one(), x);
+        }
+    }
+
+    proptest! {
+        /// Check that dividing a non-zero [`FiniteF32`] by itself returns 1.
+        #[test]
+        fn test_div_self(x in gen_finite_nonzero()) {
+            assert_eq!(x / x, FiniteF32::new(1.0).unwrap());
+        }
+    }
+
+    proptest! {
+        /// Check that dividing a non-zero [`FiniteF32`] by its opposite returns 1.
+        #[test]
+        fn test_div_neg_self(x in gen_finite_nonzero()) {
+            assert_eq!(x / x.neg(), FiniteF32::new(-1.0).unwrap());
+            assert_eq!(x.neg() / x, FiniteF32::new(-1.0).unwrap());
+        }
+    }
+
+    proptest! {
+        /// Test that dividing a [`FiniteF32`] by zero panics.
+        #[test]
+        #[should_panic]
+        fn test_div_zero(x in gen_finite()) {
+            let _ = x / FiniteF32::new(0.0).unwrap();
+        }
+    }
+
+    proptest! {
+        /// Test that dividing an infinite value by a [`FiniteF32`]s panics.
+        ///
+        /// In order to guarantee overflow, one of the two [`FiniteF32`] actually stores an
+        /// infinite value.
+        #[test]
+        #[should_panic]
+        fn test_div_infinite(finite in gen_finite(), infinite in gen_infinite()) {
+            let _ = FiniteF32(infinite) / finite;
+        }
     }
 }

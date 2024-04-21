@@ -3,7 +3,7 @@
 use super::FiniteF32;
 
 use core::ops::{Add, Mul, Neg, Sub};
-use num_traits::ops::checked::{CheckedAdd, CheckedNeg, CheckedSub};
+use num_traits::ops::checked::{CheckedAdd, CheckedMul, CheckedNeg, CheckedSub};
 
 impl Add for FiniteF32 {
     type Output = Self;
@@ -68,13 +68,23 @@ impl Mul for FiniteF32 {
     }
 }
 
+impl CheckedMul for FiniteF32 {
+    /// Performs the multiplcation between `self` and `other` and returns [`Some`] if
+    /// and only if the result is finite.
+    ///
+    /// This function never panics.
+    fn checked_mul(&self, other: &Self) -> Option<Self> {
+        Self::new(self.get() * other.get())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::FiniteF32;
 
     use num_traits::{
         identities::Zero,
-        ops::checked::{CheckedAdd, CheckedNeg, CheckedSub},
+        ops::checked::{CheckedAdd, CheckedMul, CheckedNeg, CheckedSub},
     };
     use proptest::{
         num::f32::{INFINITE, NEGATIVE, POSITIVE},
@@ -275,6 +285,42 @@ mod tests {
         #[should_panic]
         fn test_mul_overflow(finite in gen_finite(), infinite in gen_infinite()) {
             let _ = finite * FiniteF32(infinite);
+        }
+    }
+
+    proptest! {
+        /// Test that running [`FiniteF32::checked_mul`] with `other` equal to zero returns
+        /// zero wrapped in [`Some`].
+        #[test]
+        fn test_checked_mul_zero(x in gen_finite()) {
+            let zero = FiniteF32::new(0.0).unwrap();
+            assert_eq!(x.checked_mul(&zero), Some(zero));
+            assert_eq!(zero.checked_mul(&x), Some(zero));
+        }
+    }
+
+    proptest! {
+        /// Test that running [`FiniteF32::checked_mul`] with `other` equal to one returns
+        /// the original number wrapped in [`Some`].
+        #[test]
+        fn test_checked_mul_one(x in gen_finite()) {
+            let one = FiniteF32::new(1.0).unwrap();
+            assert_eq!(x.checked_mul(&one), Some(x));
+            assert_eq!(one.checked_mul(&x), Some(x));
+        }
+    }
+
+    proptest! {
+        /// Test that if the checked multiplication of two [`FiniteF32`]s overflows then the
+        /// return is [`None`].
+        ///
+        /// In order to guarantee overflow, one of the two [`FiniteF32`] actually stores an
+        /// infinite value.
+        #[test]
+        fn test_checked_mul_overflow(finite in gen_finite(), infinite in gen_infinite()) {
+            let infinite = FiniteF32(infinite);
+            assert_eq!(finite.checked_mul(&infinite), None);
+            assert_eq!(infinite.checked_mul(&finite), None);
         }
     }
 }

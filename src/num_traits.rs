@@ -3,7 +3,7 @@
 use super::FiniteF32;
 
 use core::ops::{Add, Neg, Sub};
-use num_traits::ops::checked::{CheckedAdd, CheckedSub};
+use num_traits::ops::checked::{CheckedAdd, CheckedNeg, CheckedSub};
 
 impl Add for FiniteF32 {
     type Output = Self;
@@ -47,13 +47,23 @@ impl CheckedSub for FiniteF32 {
     }
 }
 
+impl CheckedNeg for FiniteF32 {
+    /// Negates `self` and wraps the result in [`Some`].
+    ///
+    /// Given that the oppositive of a [`FiniteF32`] is always finite, this method will
+    /// never return [`None`].
+    fn checked_neg(&self) -> Option<Self> {
+        Some(self.neg())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::FiniteF32;
 
     use num_traits::{
         identities::Zero,
-        ops::checked::{CheckedAdd, CheckedSub},
+        ops::checked::{CheckedAdd, CheckedNeg, CheckedSub},
     };
     use proptest::{
         num::f32::{INFINITE, NEGATIVE, POSITIVE},
@@ -213,6 +223,15 @@ mod tests {
             let infinite = FiniteF32(infinite);
             assert_eq!(finite.checked_add(&infinite), None);
             assert_eq!(infinite.checked_add(&finite), None);
+        }
+    }
+
+    proptest! {
+        /// Test that [`FiniteF32::checked_neg`] always returns
+        /// <code>Some([FiniteF32::neg])</code>.
+        #[test]
+        fn test_checked_neg(x in gen_finite()) {
+            assert_eq!(x.checked_neg(), Some(-x))
         }
     }
 }

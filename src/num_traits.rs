@@ -83,7 +83,7 @@ mod tests {
     use super::FiniteF32;
 
     use num_traits::{
-        identities::Zero,
+        identities::{One, Zero},
         ops::checked::{CheckedAdd, CheckedMul, CheckedNeg, CheckedSub},
     };
     use proptest::{
@@ -322,5 +322,39 @@ mod tests {
             assert_eq!(finite.checked_mul(&infinite), None);
             assert_eq!(infinite.checked_mul(&finite), None);
         }
+    }
+
+    /// Check that [`FiniteF32::one`] returns the correct result.
+    #[test]
+    fn test_one() {
+        assert_eq!(FiniteF32::one(), FiniteF32(1.0));
+    }
+
+    proptest! {
+        /// Test that [`FiniteF32::set_one`] works correctly.
+        #[test]
+        fn test_set_one(mut x in gen_finite()) {
+            x.set_one();
+            assert_eq!(x, FiniteF32(1.0));
+        }
+    }
+
+    proptest! {
+        /// Test that [`FiniteF32::is_one`] is coherent with [`f32::is_one`].
+        #[test]
+        fn test_is_one(x in gen_finite()) {
+            assert_eq!(x.is_one(), x.get().is_one());
+        }
+    }
+
+    /// Test that [`FiniteF32::is_one`] returns `true` if the wrapped number is 1.
+    ///
+    /// This is a particular case of [`test_is_one`], but it was deemed so important that it
+    /// should have its own test. If this test were to be omitted, there would be no
+    /// guarantee that [`test_is_one`] would check this specific example.
+    #[test]
+    fn test_is_one_for_one() {
+        let one = FiniteF32(1.0);
+        assert_eq!(one.is_one(), true);
     }
 }

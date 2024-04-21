@@ -13,6 +13,7 @@ rust-version = "1.56"
 
 [dependencies]
 float-cmp = { version = "0.9", default-features = false, features = ["std"], optional = true }
+num-derive = { version = "0.3", optional = true }
 num-traits = { version = "0.2", optional = true, default-features = false }
 serde = { version = "1", optional = true }
 
@@ -27,3 +28,5 @@ default = ["approx-eq"]
 # via the `float-cmp` crate.
 # Disables `no_std`.
 approx-eq = ["float-cmp"]
+
+num-traits = ["dep:num-derive", "dep:num-traits"]

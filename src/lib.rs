@@ -694,12 +694,22 @@ fn clamp_f64(min: f64, val: f64, max: f64) -> f64 {
 mod tests {
     use super::*;
 
+    #[cfg(feature = "num-traits")]
+    use ::num_traits::Zero;
+
     #[test]
     fn finite_f32() {
         assert_eq!(FiniteF32::new(0.0).map(|n| n.get()), Some(0.0));
         assert_eq!(FiniteF32::new(core::f32::NAN), None);
         assert_eq!(FiniteF32::new(core::f32::INFINITY), None);
         assert_eq!(FiniteF32::new(core::f32::NEG_INFINITY), None);
+    }
+
+    /// Check that [`FiniteF32::zero`] is present and returns the correct value.
+    #[cfg(feature = "num-traits")]
+    #[test]
+    fn finite_f32_zero() {
+        assert_eq!(FiniteF32::zero(), FiniteF32(0.0));
     }
 
     #[test]

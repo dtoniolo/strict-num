@@ -3,7 +3,7 @@
 use super::FiniteF32;
 
 use core::ops::{Add, Div, Mul, Neg, Sub};
-use num_traits::ops::checked::{CheckedAdd, CheckedMul, CheckedNeg, CheckedSub};
+use num_traits::ops::checked::{CheckedAdd, CheckedDiv, CheckedMul, CheckedNeg, CheckedSub};
 
 impl Add for FiniteF32 {
     type Output = Self;
@@ -89,6 +89,16 @@ impl Div for FiniteF32 {
     }
 }
 
+impl CheckedDiv for FiniteF32 {
+    /// Performs the multiplcation between `self` and `v` and returns [`Some`] if and
+    /// only if the result is finite.
+    ///
+    /// This function never panics.
+    fn checked_div(&self, v: &Self) -> Option<Self> {
+        Self::new(self.get() / v.get())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::FiniteF32;
@@ -96,7 +106,7 @@ mod tests {
     use core::ops::Neg;
     use num_traits::{
         identities::{One, Zero},
-        ops::checked::{CheckedAdd, CheckedMul, CheckedNeg, CheckedSub},
+        ops::checked::{CheckedAdd, CheckedDiv, CheckedMul, CheckedNeg, CheckedSub},
     };
     use proptest::{
         num::f32::{INFINITE, NEGATIVE, POSITIVE},
@@ -421,6 +431,54 @@ mod tests {
         #[should_panic]
         fn test_div_infinite(finite in gen_finite(), infinite in gen_infinite()) {
             let _ = FiniteF32(infinite) / finite;
+        }
+    }
+
+    proptest! {
+        /// Check that the checked division between a [`FiniteF32`] and 1 returns the
+        /// original number wrapped in [`Some`].
+        #[test]
+        fn test_checked_div_one(x in gen_finite()) {
+            assert_eq!(x.checked_div(&FiniteF32::one()), Some(x));
+        }
+    }
+
+    proptest! {
+        /// Check that the checked division of a non-zero [`FiniteF32`] by itself returns 1
+        /// wrapped in [`Some`].
+        #[test]
+        fn test_checked_div_self(x in gen_finite_nonzero()) {
+            assert_eq!(x.checked_div(&x), Some(FiniteF32::new(1.0).unwrap()));
+        }
+    }
+
+    proptest! {
+        /// Check that the checked division of a non-zero [`FiniteF32`] by its opposite
+        /// returns 1 wrapped in [`Some`].
+        #[test]
+        fn test_checked_div_neg_self(x in gen_finite_nonzero()) {
+            assert_eq!(x.checked_div(&x.neg()), Some(FiniteF32::new(-1.0).unwrap()));
+            assert_eq!(x.neg().checked_div(&x), Some(FiniteF32::new(-1.0).unwrap()));
+        }
+    }
+
+    proptest! {
+        /// Test that the checked division a [`FiniteF32`] by zero returns [`None`].
+        #[test]
+        fn test_checked_div_zero(x in gen_finite()) {
+            assert_eq!(x.checked_div(&FiniteF32::new(0.0).unwrap()), None);
+        }
+    }
+
+    proptest! {
+        /// Test that the checked division of an infinite value by a [`FiniteF32`]s returns
+        /// [`None`].
+        ///
+        /// In order to guarantee overflow, one of the two [`FiniteF32`] actually stores an
+        /// infinite value.
+        #[test]
+        fn test_checked_div_infinite(finite in gen_finite(), infinite in gen_infinite()) {
+            assert_eq!(FiniteF32(infinite).checked_div(&finite), None);
         }
     }
 }

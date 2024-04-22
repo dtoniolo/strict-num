@@ -2,7 +2,7 @@
 
 use super::FiniteF32;
 
-use core::ops::{Add, Div, Mul, Neg, Sub};
+use core::ops::{Add, Div, Mul, Neg, Rem, Sub};
 use num_traits::ops::{
     checked::{CheckedAdd, CheckedDiv, CheckedMul, CheckedNeg, CheckedSub},
     inv::Inv,
@@ -109,6 +109,16 @@ impl Inv for FiniteF32 {
     /// This function will panic if and only if the result overflows.
     fn inv(self) -> Self::Output {
         Self::new(self.get().inv()).expect("Overflowed when computing the multiplicative inverse.")
+    }
+}
+
+impl Rem for FiniteF32 {
+    type Output = Self;
+
+    /// # Panics
+    /// This function will panic if and only if the result overflows.
+    fn rem(self, rhs: Self) -> Self::Output {
+        Self::new(self.get().rem(rhs.get())).expect("Overflowed.")
     }
 }
 

@@ -4,7 +4,7 @@ use super::FiniteF32;
 
 use core::ops::{Add, Div, Mul, Neg, Rem, Sub};
 use num_traits::ops::{
-    checked::{CheckedAdd, CheckedDiv, CheckedMul, CheckedNeg, CheckedSub},
+    checked::{CheckedAdd, CheckedDiv, CheckedMul, CheckedNeg, CheckedRem, CheckedSub},
     inv::Inv,
 };
 
@@ -116,9 +116,20 @@ impl Rem for FiniteF32 {
     type Output = Self;
 
     /// # Panics
-    /// This function will panic if and only if the result overflows.
+    /// This function will panic if and only if the result overflows.  See
+    /// [`Self::checked_rem`] for a version without panic.
     fn rem(self, rhs: Self) -> Self::Output {
         Self::new(self.get().rem(rhs.get())).expect("Overflowed.")
+    }
+}
+
+impl CheckedRem for FiniteF32 {
+    /// Computes the remainer between `self` and `v`, returning `None` if and only if
+    /// the result overflows.
+    ///
+    /// This function never panics.
+    fn checked_rem(&self, v: &Self) -> Option<Self> {
+        Self::new(self.get().rem(v.get()))
     }
 }
 

@@ -3,7 +3,10 @@
 use super::FiniteF32;
 
 use core::ops::{Add, Div, Mul, Neg, Sub};
-use num_traits::ops::checked::{CheckedAdd, CheckedDiv, CheckedMul, CheckedNeg, CheckedSub};
+use num_traits::ops::{
+    checked::{CheckedAdd, CheckedDiv, CheckedMul, CheckedNeg, CheckedSub},
+    inv::Inv,
+};
 
 impl Add for FiniteF32 {
     type Output = Self;
@@ -99,6 +102,16 @@ impl CheckedDiv for FiniteF32 {
     }
 }
 
+impl Inv for FiniteF32 {
+    type Output = Self;
+
+    /// # Panics
+    /// This function will panic if and only if the result overflows.
+    fn inv(self) -> Self::Output {
+        Self::new(self.get().inv()).expect("Overflowed when computing the multiplicative inverse.")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::FiniteF32;
@@ -106,7 +119,10 @@ mod tests {
     use core::ops::Neg;
     use num_traits::{
         identities::{One, Zero},
-        ops::checked::{CheckedAdd, CheckedDiv, CheckedMul, CheckedNeg, CheckedSub},
+        ops::{
+            checked::{CheckedAdd, CheckedDiv, CheckedMul, CheckedNeg, CheckedSub},
+            inv::Inv,
+        },
     };
     use proptest::{
         num::f32::{INFINITE, NEGATIVE, POSITIVE},
@@ -480,5 +496,21 @@ mod tests {
         fn test_checked_div_infinite(finite in gen_finite(), infinite in gen_infinite()) {
             assert_eq!(FiniteF32(infinite).checked_div(&finite), None);
         }
+    }
+
+    /// Test that [`FiniteF32::inv`] doesn't panic and returns the correct result for a
+    /// few examples that don't overflow.
+    #[test]
+    fn test_inv_coorect() {
+        for x in [-2.0, -1.0, 1.0, 2.0] {
+            assert_eq!(FiniteF32(x).inv(), FiniteF32(x.inv()));
+        }
+    }
+
+    /// Test that [`finiteF32::inv`] panics when the input value is zero.
+    #[test]
+    #[should_panic]
+    fn test_inv_zero() {
+        FiniteF32(0.0).inv();
     }
 }

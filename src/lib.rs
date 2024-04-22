@@ -110,7 +110,7 @@ macro_rules! impl_approx_64 {
 /// Unlike [`f32`], implements [`Eq`], [`Ord`] and [`Hash`].
 #[cfg_attr(
     feature = "num-traits",
-    derive(num_derive::Zero, num_derive::One, derive_more::Neg)
+    derive(num_derive::Zero, num_derive::One, derive_more::Neg, num_derive::Num)
 )]
 #[derive(Copy, Clone, Default, Debug)]
 #[repr(transparent)]

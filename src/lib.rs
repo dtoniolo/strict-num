@@ -675,7 +675,9 @@ fn clamp_f64(min: f64, val: f64, max: f64) -> f64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use write_to::WriteTo;
+
+    use core::fmt;
+    use heapless::String;
 
     #[test]
     fn finite_f32() {
@@ -689,14 +691,17 @@ mod tests {
     /// one of [`f32`].
     #[test]
     fn test_finite_f32_display() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:.5}",
-                FiniteF32::new(core::f32::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:.5}", core::f32::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:.5}", FiniteF32::new(core::f32::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:.5}", core::f32::consts::PI),
+            ),
         );
     }
 
@@ -704,14 +709,17 @@ mod tests {
     /// one of [`f32`] for a single example.
     #[test]
     fn test_finite_f32_lower_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:e}",
-                FiniteF32::new(core::f32::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:e}", core::f32::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:e}", FiniteF32::new(core::f32::consts::PI).unwrap(),),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:e}", core::f32::consts::PI),
+            ),
         );
     }
 
@@ -719,14 +727,17 @@ mod tests {
     /// one of [`f32`] for a single example.
     #[test]
     fn test_finite_f32_upper_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:E}",
-                FiniteF32::new(core::f32::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:E}", core::f32::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:E}", FiniteF32::new(core::f32::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:E}", core::f32::consts::PI)
+            ),
         );
     }
 
@@ -734,14 +745,17 @@ mod tests {
     /// one of [`f64`].
     #[test]
     fn test_finite_f64_display() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:.5}",
-                FiniteF64::new(core::f64::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:.5}", core::f64::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:.5}", FiniteF64::new(core::f64::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:.5}", core::f64::consts::PI)
+            ),
         );
     }
 
@@ -749,14 +763,17 @@ mod tests {
     /// one of [`f64`] for a single example.
     #[test]
     fn test_finite_f64_lower_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:e}",
-                FiniteF64::new(core::f64::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:e}", core::f64::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:e}", FiniteF64::new(core::f64::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:e}", core::f64::consts::PI)
+            ),
         );
     }
 
@@ -764,14 +781,17 @@ mod tests {
     /// one of [`f64`] for a single example.
     #[test]
     fn test_finite_f64_upper_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:E}",
-                FiniteF64::new(core::f64::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:E}", core::f64::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:E}", FiniteF64::new(core::f64::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:E}", core::f64::consts::PI)
+            ),
         );
     }
 
@@ -797,14 +817,17 @@ mod tests {
     /// one of [`f32`].
     #[test]
     fn test_postiive_f32_display() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:.5}",
-                PositiveF32::new(core::f32::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:.5}", core::f32::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:.5}", PositiveF32::new(core::f32::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:.5}", core::f32::consts::PI)
+            ),
         );
     }
 
@@ -812,14 +835,17 @@ mod tests {
     /// the one of [`f32`] for a single example.
     #[test]
     fn test_positive_f32_lower_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:e}",
-                PositiveF32::new(core::f32::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:e}", core::f32::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:e}", PositiveF32::new(core::f32::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:e}", core::f32::consts::PI)
+            ),
         );
     }
 
@@ -827,14 +853,17 @@ mod tests {
     /// the one of [`f32`] for a single example.
     #[test]
     fn test_positive_f32_upper_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:E}",
-                PositiveF32::new(core::f32::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:E}", core::f32::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:E}", PositiveF32::new(core::f32::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:E}", core::f32::consts::PI)
+            ),
         );
     }
 
@@ -860,14 +889,17 @@ mod tests {
     /// one of [`f64`].
     #[test]
     fn test_postiive_f64_display() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:.5}",
-                PositiveF64::new(core::f64::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:.5}", core::f64::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:.5}", PositiveF64::new(core::f64::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:.5}", core::f64::consts::PI)
+            ),
         );
     }
 
@@ -875,14 +907,17 @@ mod tests {
     /// the one of [`f64`] for a single example.
     #[test]
     fn test_positive_f64_lower_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:e}",
-                PositiveF64::new(core::f64::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:e}", core::f64::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:e}", PositiveF64::new(core::f64::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:e}", core::f64::consts::PI)
+            ),
         );
     }
 
@@ -890,14 +925,17 @@ mod tests {
     /// the one of [`f64`] for a single example.
     #[test]
     fn test_positive_f64_upper_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:E}",
-                PositiveF64::new(core::f64::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:E}", core::f64::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!("{:E}", PositiveF64::new(core::f64::consts::PI).unwrap()),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:E}", core::f64::consts::PI)
+            ),
         );
     }
 
@@ -905,14 +943,20 @@ mod tests {
     /// to the one of [`f32`].
     #[test]
     fn test_nonzero_postiive_f32_display() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:.5}",
-                NonZeroPositiveF32::new(core::f32::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:.5}", core::f32::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:.5}",
+                    NonZeroPositiveF32::new(core::f32::consts::PI).unwrap()
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:.5}", core::f32::consts::PI)
+            ),
         );
     }
 
@@ -920,14 +964,20 @@ mod tests {
     /// equivalent to the one of [`f32`] for a single example.
     #[test]
     fn test_nonzero_positive_f32_lower_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:e}",
-                NonZeroPositiveF32::new(core::f32::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:e}", core::f32::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:e}",
+                    NonZeroPositiveF32::new(core::f32::consts::PI).unwrap()
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:e}", core::f32::consts::PI)
+            ),
         );
     }
 
@@ -935,14 +985,20 @@ mod tests {
     /// equivalent to the one of [`f32`] for a single example.
     #[test]
     fn test_nonzero_positive_f32_upper_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:E}",
-                NonZeroPositiveF32::new(core::f32::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:E}", core::f32::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:E}",
+                    NonZeroPositiveF32::new(core::f32::consts::PI).unwrap()
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:E}", core::f32::consts::PI)
+            ),
         );
     }
 
@@ -950,14 +1006,20 @@ mod tests {
     /// to the one of [`f64`].
     #[test]
     fn test_nonzero_postiive_f64_display() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:.5}",
-                NonZeroPositiveF64::new(core::f64::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:.5}", core::f64::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:.5}",
+                    NonZeroPositiveF64::new(core::f64::consts::PI).unwrap()
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:.5}", core::f64::consts::PI)
+            ),
         );
     }
 
@@ -965,14 +1027,20 @@ mod tests {
     /// equivalent to the one of [`f64`] for a single example.
     #[test]
     fn test_nonzero_positive_f64_lower_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:e}",
-                NonZeroPositiveF64::new(core::f64::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:e}", core::f64::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:e}",
+                    NonZeroPositiveF64::new(core::f64::consts::PI).unwrap()
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:e}", core::f64::consts::PI)
+            ),
         );
     }
 
@@ -980,14 +1048,20 @@ mod tests {
     /// equivalent to the one of [`f64`] for a single example.
     #[test]
     fn test_nonzero_positive_f64_upper_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:E}",
-                NonZeroPositiveF64::new(core::f64::consts::PI).unwrap()
-            )),
-            second_buffer.format(format_args!("{:E}", core::f64::consts::PI)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:E}",
+                    NonZeroPositiveF64::new(core::f64::consts::PI).unwrap(),
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:E}", core::f64::consts::PI),
+            ),
         );
     }
 
@@ -1024,14 +1098,20 @@ mod tests {
     /// the one of [`f32`].
     #[test]
     fn test_normalized_f32_display() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:.5}",
-                NormalizedF32::new(core::f32::consts::FRAC_1_SQRT_2).unwrap()
-            )),
-            second_buffer.format(format_args!("{:.5}", core::f32::consts::FRAC_1_SQRT_2)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:.5}",
+                    NormalizedF32::new(core::f32::consts::FRAC_1_SQRT_2).unwrap(),
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:.5}", core::f32::consts::FRAC_1_SQRT_2),
+            ),
         );
     }
 
@@ -1039,14 +1119,20 @@ mod tests {
     /// the one of [`f32`] for a single example.
     #[test]
     fn test_normalized_f32_lower_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:e}",
-                NormalizedF32::new(core::f32::consts::FRAC_1_SQRT_2).unwrap()
-            )),
-            second_buffer.format(format_args!("{:e}", core::f32::consts::FRAC_1_SQRT_2)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:e}",
+                    NormalizedF32::new(core::f32::consts::FRAC_1_SQRT_2).unwrap()
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:e}", core::f32::consts::FRAC_1_SQRT_2),
+            ),
         );
     }
 
@@ -1054,14 +1140,20 @@ mod tests {
     /// the one of [`f32`] for a single example.
     #[test]
     fn test_normalized_f32_upper_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:E}",
-                NormalizedF32::new(core::f32::consts::FRAC_1_SQRT_2).unwrap()
-            )),
-            second_buffer.format(format_args!("{:E}", core::f32::consts::FRAC_1_SQRT_2)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:E}",
+                    NormalizedF32::new(core::f32::consts::FRAC_1_SQRT_2).unwrap(),
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:E}", core::f32::consts::FRAC_1_SQRT_2),
+            ),
         );
     }
 
@@ -1098,14 +1190,20 @@ mod tests {
     /// the one of [`f64`].
     #[test]
     fn test_normalized_f64_display() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:.5}",
-                NormalizedF64::new(core::f64::consts::FRAC_1_SQRT_2).unwrap()
-            )),
-            second_buffer.format(format_args!("{:.5}", core::f64::consts::FRAC_1_SQRT_2)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:.5}",
+                    NormalizedF64::new(core::f64::consts::FRAC_1_SQRT_2).unwrap(),
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:.5}", core::f64::consts::FRAC_1_SQRT_2),
+            ),
         );
     }
 
@@ -1113,14 +1211,20 @@ mod tests {
     /// the one of [`f64`] for a single example.
     #[test]
     fn test_normalized_f64_lower_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:e}",
-                NormalizedF64::new(core::f64::consts::FRAC_1_SQRT_2).unwrap()
-            )),
-            second_buffer.format(format_args!("{:e}", core::f64::consts::FRAC_1_SQRT_2)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:e}",
+                    NormalizedF64::new(core::f64::consts::FRAC_1_SQRT_2).unwrap(),
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:e}", core::f64::consts::FRAC_1_SQRT_2),
+            ),
         );
     }
 
@@ -1128,81 +1232,30 @@ mod tests {
     /// the one of [`f64`] for a single example.
     #[test]
     fn test_normalized_f64_upper_exp() {
-        let mut first_buffer = WriteTo::<10>::default();
-        let mut second_buffer = WriteTo::<10>::default();
+        let mut first_buffer = String::<10>::new();
+        let mut second_buffer = String::<10>::new();
         assert_eq!(
-            first_buffer.format(format_args!(
-                "{:E}",
-                NormalizedF64::new(core::f64::consts::FRAC_1_SQRT_2).unwrap()
-            )),
-            second_buffer.format(format_args!("{:E}", core::f64::consts::FRAC_1_SQRT_2)),
+            format(
+                &mut first_buffer,
+                format_args!(
+                    "{:E}",
+                    NormalizedF64::new(core::f64::consts::FRAC_1_SQRT_2).unwrap(),
+                ),
+            ),
+            format(
+                &mut second_buffer,
+                format_args!("{:E}", core::f64::consts::FRAC_1_SQRT_2),
+            ),
         );
     }
 
-    pub mod write_to {
-        use core::fmt;
-
-        /// Used to test the various string formatting traits without [`format`].
-        ///
-        /// This is a `#![no_std]` crate and the [`format`] macro needs to be able to
-        /// allocate a [`String`], which is not possible in a `#![no_std]` crate.
-        ///
-        /// This struct works by writing to a [`u8`] buffer whose length is known at
-        /// compile time.
-        ///
-        /// `N` is the size of the buffer.
-        ///
-        /// [Source](https://stackoverflow.com/questions/50200268/\
-        /// how-can-i-use-the-format-macro-in-a-no-std-environment)
-        pub struct WriteTo<const N: usize> {
-            /// The fixed size buffer in which the strings are written.
-            buffer: [u8; N],
-            /// The number of bytes of [`buffer`] that have been used. Guaranteed to be
-            /// not greater than `N`.
-            used: usize,
-        }
-
-        impl<const N: usize> Default for WriteTo<N> {
-            /// Initialize a new instance with an empty buffer.
-            fn default() -> Self {
-                Self {
-                    buffer: [0u8; N],
-                    used: 0,
-                }
-            }
-        }
-
-        impl<const N: usize> fmt::Write for WriteTo<N> {
-            /// Writes the provided string into the [`buffer`][Self::buffer].
-            ///
-            /// If the [`buffer`][Self::buffer] does not have enough space left then
-            /// this method returns an error and nothing is written on the buffer.
-            fn write_str(&mut self, s: &str) -> fmt::Result {
-                let raw_s = s.as_bytes();
-                if raw_s.len() + self.used > N {
-                    return Err(fmt::Error);
-                }
-                let remaining_buf = &mut self.buffer[self.used..];
-                remaining_buf[..raw_s.len()].copy_from_slice(raw_s);
-                self.used += raw_s.len();
-                Ok(())
-            }
-        }
-
-        impl<const N: usize> WriteTo<N> {
-            pub fn as_str(&self) -> &str {
-                unsafe { core::str::from_utf8_unchecked(&self.buffer[..self.used]) }
-            }
-
-            /// Write the provided arguments into the [`buffer`][Self::buffer] and
-            /// return a reference to it.
-            ///
-            /// If the [`buffer`][Self::buffer] does not have enough space left then
-            /// this method returns an error and nothing is written on the buffer.
-            pub fn format(&mut self, args: fmt::Arguments) -> Result<&str, fmt::Error> {
-                fmt::write(self, args)?;
-                Ok(self.as_str())
-            }
-        }
+    /// Same as its homonym from the standard library, but uses strings that don't
+    /// require heap allocation.
+    pub fn format<'s, const N: usize>(
+        buffer: &'s mut String<N>,
+        args: fmt::Arguments,
+    ) -> Result<&'s str, fmt::Error> {
+        fmt::write(buffer, args)?;
+        Ok(buffer.as_str())
     }
 }

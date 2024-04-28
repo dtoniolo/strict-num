@@ -95,7 +95,8 @@ macro_rules! impl_approx_64 {
 /// An immutable, finite [`f32`].
 ///
 /// Unlike [`f32`], implements [`Eq`], [`Ord`] and [`Hash`].
-#[derive(Copy, Clone, Default, Debug, Display, LowerExp, UpperExp)]
+#[derive(Copy, Clone, Default, derive_more::Into, Debug, Display, LowerExp, UpperExp)]
+#[into(owned, ref)]
 #[repr(transparent)]
 pub struct FiniteF32(f32);
 
@@ -177,7 +178,8 @@ impl_approx_32!(FiniteF32);
 /// An immutable, finite [`f64`].
 ///
 /// Unlike [`f64`], implements [`Eq`], [`Ord`] and [`Hash`].
-#[derive(Copy, Clone, Default, Debug, Display, LowerExp, UpperExp)]
+#[derive(Copy, Clone, Default, derive_more::Into, Debug, Display, LowerExp, UpperExp)]
+#[into(owned, ref)]
 #[repr(transparent)]
 pub struct FiniteF64(f64);
 
@@ -258,8 +260,9 @@ impl_approx_64!(FiniteF64);
 
 /// An immutable, finite [`f32`] that is known to be >= 0.
 #[derive(
-    Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, Debug, Display, LowerExp, UpperExp,
+    Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default, derive_more::Into, Debug, Display, LowerExp, UpperExp,
 )]
+#[into(owned(FiniteF32, f32), ref(FiniteF32, f32))]
 #[repr(transparent)]
 pub struct PositiveF32(FiniteF32);
 
@@ -677,12 +680,33 @@ mod tests {
     use super::*;
     use write_to::WriteTo;
 
+    use proptest::{prop_compose, proptest};
+
     #[test]
     fn finite_f32() {
         assert_eq!(FiniteF32::new(0.0).map(|n| n.get()), Some(0.0));
         assert_eq!(FiniteF32::new(core::f32::NAN), None);
         assert_eq!(FiniteF32::new(core::f32::INFINITY), None);
         assert_eq!(FiniteF32::new(core::f32::NEG_INFINITY), None);
+    }
+
+    prop_compose! {
+        /// Randomly generate a [`FiniteF32`].
+        pub fn gen_finite_f32()
+            (x in any::<f32>().prop_filter("Values must be finite", |x| x.is_finite())) -> FiniteF32 {
+                FiniteF32::new(x).unwrap()
+            }
+    }
+
+    proptest! {
+        /// Test that the conversion form a [`FiniteF32`] to an [`f32`] works.
+        ///
+        /// Both owned and ref conversion are tested.
+        #[test]
+        fn test_from_finite_f32(x in gen_finite_f32()) {
+            assert_eq!(<&f32>::from(&x), &x);
+            assert_eq!(f32::from(x.clone()), x.get());
+        }
     }
 
     /// Test that the [`Display`] implementation of [`FiniteF32`] is equivalent to the
@@ -728,6 +752,25 @@ mod tests {
             )),
             second_buffer.format(format_args!("{:E}", core::f32::consts::PI)),
         );
+    }
+
+    prop_compose! {
+        /// Randomly generate a [`FiniteF64`].
+        pub fn gen_finite_f64()
+            (x in any::<f64>().prop_filter("Values must be finite", |x| x.is_finite())) -> FiniteF64 {
+                FiniteF64::new(x).unwrap()
+            }
+    }
+
+    proptest! {
+        /// Test that the conversion form a [`FiniteF64`] to an [`f64`] works.
+        ///
+        /// Both owned and ref conversion are tested.
+        #[test]
+        fn test_from_finite_f64(x in gen_finite_f64()) {
+            assert_eq!(<&f64>::from(&x), &x);
+            assert_eq!(f64::from(x.clone()), x.get());
+        }
     }
 
     /// Test that the [`Display`] implementation of [`FiniteF64`] is equivalent to the
@@ -791,6 +834,25 @@ mod tests {
         assert_eq!(NonZeroPositiveF32::new(core::f32::NAN), None);
         assert_eq!(NonZeroPositiveF32::new(core::f32::INFINITY), None);
         assert_eq!(NonZeroPositiveF32::new(core::f32::NEG_INFINITY), None);
+    }
+
+    prop_compose! {
+        /// Randomly generate a [`FiniteF32`].
+        pub fn gen_positive_f32()
+            (x in (0_f32..).prop_filter("Values must be finite", |x| x.is_finite())) -> PositiveF32 {
+                PositiveF32::new(x).unwrap()
+            }
+    }
+
+    proptest! {
+        /// Test that the conversion form a [`PositiveF32`] to an [`FiniteF32`] works.
+        ///
+        /// Both owned and ref conversion are tested.
+        #[test]
+        fn test_from_positive_f32(x in gen_positive_f64()) {
+            assert_eq!(<&f64>::from(&x), &x);
+            assert_eq!(f64::from(x.clone()), x.get());
+        }
     }
 
     /// Test that the [`Display`] implementation of [`PositiveF32`] is equivalent to the
